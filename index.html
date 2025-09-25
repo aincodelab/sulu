@@ -58,6 +58,8 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
+            height: 4vh;      /* tinggi 10% dari viewport */
+            min-height: 4vh;  /* jaga agar minimum tetap 10% */
         }
 
         .logo {
@@ -177,7 +179,7 @@
         .search-container {
             display: flex;
             margin-bottom: 1.5rem;
-            gap: 10px;
+            gap: 5px;
         }
 
         .search-input {
@@ -445,6 +447,8 @@
             align-items: center;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
+            height: 2vh;      /* tinggi 10% dari viewport */
+            min-height: 2vh;  /* jaga agar minimum tetap 10% */
         }
 
         .modal-header h2 {
@@ -723,7 +727,7 @@
             <div class="header-content">
                 <div class="logo">
                     <i class="fas fa-database"></i>
-                    <span>Data Management System</span>
+                    <span>DMS</span>
                 </div>
                 <button class="mobile-menu-btn">
                     <i class="fas fa-bars"></i>
@@ -743,7 +747,7 @@
     <main>
         <div class="container">
             <div class="page-title">
-                <h1><i class="fas fa-table"></i> Daftar Undangan</h1>
+                <h1><i class="fas fa-table"></i> Daftar undangan</h1>
                 <button class="btn btn-primary" id="addBtn">
                     <i class="fas fa-plus"></i> Tambah Data Baru
                 </button>
@@ -828,15 +832,14 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" id="deleteBtn" style="display: none;">
-                    <i class="fas fa-trash"></i> Hapus
-                </button>
                 <button class="btn" id="cancelBtn">
                   <i class="fas fa-close"></i>Batal
                 </button>
-
                 <button class="btn btn-primary" id="saveBtn">
                     <i class="fas fa-save"></i> Simpan
+                </button>
+                <button class="btn btn-danger" id="deleteBtn" style="display: none;">
+                    <i class="fas fa-trash"></i> Hapus
                 </button>
             </div>
         </div>
@@ -858,7 +861,9 @@
 
     <script>
         const CONFIG = {
-            API_URL: "https://script.google.com/macros/s/AKfycbyW-rJM-2tuV5Pa0HE4-cCbY0YeJgOXBoGYgJFtWBhQEfpNRAU8mitHDP0qAk2Sy4-R/exec"};
+            API_URL: "https://script.google.com/macros/s/AKfycbyW-rJM-2tuV5Pa0HE4-cCbY0YeJgOXBoGYgJFtWBhQEfpNRAU8mitHDP0qAk2Sy4-R/exec",
+            API_URL_DD: "https://script.google.com/macros/s/AKfycbyGJHOL0dXBN5PKIN4tXe8f9CP-KdWl5NXY-qHOWLVj9b_tyIY-yLyrHWiro3JE03CO/exec"
+        };
 
         // Elemen DOM
         const tableHeader = document.getElementById('tableHeader');
@@ -894,6 +899,7 @@
         let allRecords = [];
         let filteredRecords = [];
         let uniqueFieldName = null;
+        let dropDown = {}; // Variabel untuk menyimpan data dropdown
         
         // Pagination variables
         let currentPage = 1;
@@ -924,6 +930,7 @@
 
         // Inisialisasi aplikasi
         async function initializeApp() {
+            await loadDropdownData(); // Load data dropdown terlebih dahulu
             await loadData();
             
             // Mobile menu functionality
@@ -952,6 +959,39 @@
                     icon.classList.add('fa-bars');
                 }
             });
+        }
+
+        // Fungsi untuk memuat data dropdown dari API_URL_DD
+        async function loadDropdownData() {
+            showLoading();
+            try { 
+                const response = await fetch(CONFIG.API_URL_DD, {
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        action: "read", 
+                        startRow: 2, 
+                        limit: 1000
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Simpan data dropdown ke variabel dropDown
+                    dropDown = {
+                        fields: result.fields || [],
+                        records: result.records || []
+                    };
+                    
+                    console.log('Data dropdown berhasil dimuat:', dropDown);
+                } else {
+                    console.error('Gagal memuat data dropdown:', result.message);
+                }
+            } catch (error) {
+                console.error('Error memuat data dropdown:', error);
+            }finally {
+                hideLoading();
+            }
         }
 
         // Fungsi untuk memuat data dari Google Sheets
@@ -1067,6 +1107,7 @@
         function renderTable() {
             renderTableHeader();
             renderTableBody();
+            
         }
 
         // Fungsi untuk render header tabel - DIPERBAIKI
@@ -1095,6 +1136,7 @@
 
         // Fungsi untuk render body tabel
         function renderTableBody() {
+            showLoading();
             tableBody.innerHTML = '';
             
             if (filteredRecords.length === 0) {
@@ -1132,7 +1174,7 @@
                 });
                 
                 tableBody.appendChild(row);
-            });
+            }); hideLoading();
         }
 
         // Fungsi untuk update informasi pagination
@@ -1233,71 +1275,104 @@
             dataModal.style.display = 'flex';
         }
 
-// Fungsi untuk merender form secara dinamis
-function renderForm(record = null) {
-    dataForm.innerHTML = '';
-    
-    fieldNames.forEach((field, index) => {
-        const formGroup = document.createElement('div');
-        formGroup.className = 'form-group';
-        
-        const label = document.createElement('label');
-        label.textContent = field;
-        label.htmlFor = `field-${index}`;
-        
-        // Tandai field unik sebagai required
-        if (uniqueFieldName === field) {
-            label.classList.add('required-field');
-        }
-        
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.id = `field-${index}`;
-        input.className = 'form-control';
+        // Fungsi untuk merender form secara dinamis
+        function renderForm(record = null) {
+            dataForm.innerHTML = '';
+            
+            fieldNames.forEach((field, index) => {
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = field;
+                label.htmlFor = `field-${index}`;
+                
+                // Tandai field unik sebagai required
+                if (uniqueFieldName === field) {
+                    label.classList.add('required-field');
+                }
+                
+                let input;
+                
+                // Cek apakah field ini ada di data dropdown
+                const dropdownFieldIndex = dropDown.fields ? dropDown.fields.indexOf(field) : -1;
+                
+                if (dropdownFieldIndex !== -1 && dropDown.records.length > 0) {
+                    // Buat dropdown jika field ada di data dropdown
+                    input = document.createElement('select');
+                    input.id = `field-${index}`;
+                    input.className = 'form-control';
+                    
+                    // Tambah opsi default
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Pilih ' + field;
+                    input.appendChild(defaultOption);
+                    
+                    // Tambah opsi dari data dropdown
+                    dropDown.records.forEach(ddRecord => {
+                        const option = document.createElement('option');
+                        option.value = ddRecord[dropdownFieldIndex] || '';
+                        option.textContent = ddRecord[dropdownFieldIndex] || '';
+                        
+                        // Jika ada record yang diedit, set selected
+                        if (record && record[index + 1] === ddRecord[dropdownFieldIndex]) {
+                            option.selected = true;
+                        }
+                        
+                        input.appendChild(option);
+                    });
+                } else {
+                    // Buat input text biasa
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `field-${index}`;
+                    input.className = 'form-control';
 
-        if (uniqueFieldName === field) {
-            input.required = true;
+                    if (uniqueFieldName === field) {
+                        input.required = true;
 
-            // === Auto time ddmmyyyyhhmmss ===
-            const now = new Date();
-            const pad = n => n.toString().padStart(2, '0');
-            const autoTime =
-                `${pad(now.getDate())}` +        // dd
-                `${pad(now.getMonth() + 1)}` +   // mm
-                `${now.getFullYear()}` +         // yyyy
-                `${pad(now.getHours())}` +       // hh
-                `${pad(now.getMinutes())}` +     // mm
-                `${pad(now.getSeconds())}`;      // ss
+                        // === Auto time ddmmyyyyhhmmss ===
+                        const now = new Date();
+                        const pad = n => n.toString().padStart(2, '0');
+                        const autoTime =
+                            `${pad(now.getDate())}` +        // dd
+                            `${pad(now.getMonth() + 1)}` +   // mm
+                            `${now.getFullYear()}` +         // yyyy
+                            `${pad(now.getHours())}` +       // hh
+                            `${pad(now.getMinutes())}` +     // mm
+                            `${pad(now.getSeconds())}`;      // ss
 
-            // Jika record null (tambah data baru), isi otomatis
-            if (!record) {
-                input.value = autoTime;
-            }
-        }
+                        // Jika record null (tambah data baru), isi otomatis
+                        if (!record) {
+                            input.value = autoTime;
+                        }
+                    }
 
-        if (record) {
-            // record[0] adalah ID, record[index+1] adalah data field
-            input.value = record[index + 1] || '';
+                    if (record) {
+                        // record[0] adalah ID, record[index+1] adalah data field
+                        input.value = record[index + 1] || '';
+                    }
+                }
+                
+                formGroup.appendChild(label);
+                
+                if (uniqueFieldName === field) {
+                    const fieldInfo = document.createElement('div');
+                    fieldInfo.className = 'field-info';
+                    fieldInfo.textContent = 'Field ini harus unik dan tidak boleh kosong';
+                    formGroup.appendChild(fieldInfo);
+                }
+                
+                formGroup.appendChild(input);
+                dataForm.appendChild(formGroup);
+            });
         }
-        
-        formGroup.appendChild(label);
-        
-        if (uniqueFieldName === field) {
-            const fieldInfo = document.createElement('div');
-            fieldInfo.className = 'field-info';
-            fieldInfo.textContent = 'Field ini harus unik dan tidak boleh kosong';
-            formGroup.appendChild(fieldInfo);
-        }
-        
-        formGroup.appendChild(input);
-        dataForm.appendChild(formGroup);
-    });
-}
 
         // Fungsi untuk menyimpan data
         async function saveData() {
             const formData = {};
-            const inputs = dataForm.querySelectorAll('input');
+            const inputs = dataForm.querySelectorAll('input, select');
             let isValid = true;
             
             // Validasi form
