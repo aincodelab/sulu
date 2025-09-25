@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Data</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS dengan perbaikan warna header tabel dan pagination */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            /* max-width: 1200px; */
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        nav {
+            transition: var(--transition);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+
+        .page-title {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            display: flex;
+            margin-bottom: 1.5rem;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        th {
+            background-color: transparent;
+            font-weight: 600;
+            color: white;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        th:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        .sort-icon {
+            margin-left: 5px;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        th:hover .sort-icon {
+            opacity: 1;
+        }
+
+        .sort-asc .sort-icon::before {
+            content: "\f0de";
+        }
+
+        .sort-desc .sort-icon::before {
+            content: "\f0dd";
+        }
+
+        tr {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        tr:hover {
+            background-color: rgba(107, 236, 135, 0.192);
+        }
+
+        .status-active {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .status-inactive {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--light-gray);
+        }
+
+        .pagination-info {
+            color: var(--dark);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: bold;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .pagination-btn:disabled {
+            border-color: var(--light-gray);
+            color: var(--light-gray);
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-number {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--light-gray);
+            background: white;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .page-number:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .page-number.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.3);
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--light-gray);
+        }
+
+        .page-size-selector span {
+            color: var(--dark);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .page-size-selector select {
+            padding: 6px 10px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            background: white;
+            color: var(--dark);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .page-size-selector select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: white;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .form-group .field-info {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            z-index: 100;
+            width: 200px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 99;
+        }
+
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--success);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: row;
+                gap: 15px;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            nav {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                width: 250px;
+                background: linear-gradient(135deg, var(--primary), var(--secondary));
+                border-radius: var(--border-radius);
+                box-shadow: var(--box-shadow);
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-10px);
+                transition: var(--transition);
+            }
+
+            nav.active {
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 0;
+                padding: 10px 0;
+            }
+
+            nav li {
+                width: 100%;
+            }
+
+            nav a {
+                padding: 12px 20px;
+                border-radius: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            nav a:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .page-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .pagination-container {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .pagination-controls {
+                justify-content: center;
+            }
+
+            .page-size-selector {
+                justify-content: center;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+
+            .page-numbers {
+                gap: 3px;
+            }
+
+            .page-number, .pagination-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .modal-body, .modal-header, .modal-footer {
+                padding: 1rem;
+            }
+
+            nav {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-database"></i>
+                    <span>Data Management System</span>
+                </div>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <nav id="mainNav">
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> Beranda</a></li>
+                        <li><a href="#"><i class="fas fa-table"></i> Data</a></li>
+                        <li><a href="#"><i class="fas fa-cog"></i> Pengaturan</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Bantuan</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="page-title">
+                <h1><i class="fas fa-table"></i> Daftar Undangan</h1>
+                <button class="btn btn-primary" id="addBtn">
+                    <i class="fas fa-plus"></i> Tambah Data Baru
+                </button>
+            </div>
+
+            <div class="alert alert-success" id="successAlert">
+                <i class="fas fa-check-circle"></i> <span id="successMessage">Operasi berhasil!</span>
+            </div>
+
+            <div class="alert alert-error" id="errorAlert">
+                <i class="fas fa-exclamation-circle"></i> <span id="errorMessage">Terjadi kesalahan!</span>
+            </div>
+
+            <div class="card">
+                <div class="search-container">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Cari data...">
+                    </div>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Memuat data...</p>
+                </div>
+                
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead id="tableHeader">
+                            <!-- Header akan dimuat secara dinamis -->
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data akan dimuat di sini -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="pagination-container">
+                    <div class="pagination-info" id="paginationInfo">
+                        Menampilkan 0-0 dari 0 data
+                    </div>
+                    
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" id="prevPage" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        <div class="page-numbers" id="pageNumbers">
+                            <!-- Page numbers akan di-generate secara dinamis -->
+                        </div>
+                        
+                        <button class="pagination-btn" id="nextPage" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="page-size-selector">
+                        <span>Data per page:</span>
+                        <select id="pageSizeSelect">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal untuk Tambah/Edit Data -->
+    <div class="modal" id="dataModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Baru</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="dataForm">
+                    <!-- Form fields akan dibuat secara dinamis -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteBtn" style="display: none;">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+                <button class="btn" id="cancelBtn">
+                  <i class="fas fa-close"></i>Batal
+                </button>
+
+                <button class="btn btn-primary" id="saveBtn">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2023 Data Management System. Semua hak dilindungi.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const CONFIG = {
+            API_URL: "https://script.google.com/macros/s/AKfycbyW-rJM-2tuV5Pa0HE4-cCbY0YeJgOXBoGYgJFtWBhQEfpNRAU8mitHDP0qAk2Sy4-R/exec"};
+
+        // Elemen DOM
+        const tableHeader = document.getElementById('tableHeader');
+        const tableBody = document.getElementById('tableBody');
+        const dataModal = document.getElementById('dataModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const dataForm = document.getElementById('dataForm');
+        const addBtn = document.getElementById('addBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const closeModal = document.querySelector('.close-modal');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const nav = document.getElementById('mainNav');
+        const searchInput = document.getElementById('searchInput');
+        
+        // Pagination Elements
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageNumbersContainer = document.getElementById('pageNumbers');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const pageSizeSelect = document.getElementById('pageSizeSelect');
+
+        // Variabel state
+        let currentId = null;
+        let isEditMode = false;
+        let fieldNames = [];
+        let allRecords = [];
+        let filteredRecords = [];
+        let uniqueFieldName = null;
+        
+        // Pagination variables
+        let currentPage = 1;
+        let totalPages = 1;
+        let totalRecords = 0;
+        let perPage = 5;
+        
+        // Sorting variables - DITAMBAHKAN
+        let currentSort = {
+            column: null,
+            direction: 'asc'
+        };
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', initializeApp);
+        addBtn.addEventListener('click', openAddModal);
+        saveBtn.addEventListener('click', saveData);
+        deleteBtn.addEventListener('click', deleteData);
+        cancelBtn.addEventListener('click', closeDataModal);
+        closeModal.addEventListener('click', closeDataModal);
+        dataModal.addEventListener('click', (e) => {
+            if (e.target === dataModal) closeDataModal();
+        });
+        searchInput.addEventListener('input', performSearch);
+        pageSizeSelect.addEventListener('change', handlePageSizeChange);
+        prevPageBtn.addEventListener('click', goToPrevPage);
+        nextPageBtn.addEventListener('click', goToNextPage);
+
+        // Inisialisasi aplikasi
+        async function initializeApp() {
+            await loadData();
+            
+            // Mobile menu functionality
+            mobileMenuBtn.addEventListener('click', function() {
+                nav.classList.toggle('active');
+                // Ubah ikon menu
+                const icon = mobileMenuBtn.querySelector('i');
+                if (nav.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+            
+            // Tutup menu mobile ketika klik di luar
+            document.addEventListener('click', function(event) {
+                const isClickInsideNav = nav.contains(event.target);
+                const isClickOnMenuBtn = mobileMenuBtn.contains(event.target);
+                
+                if (!isClickInsideNav && !isClickOnMenuBtn && nav.classList.contains('active')) {
+                    nav.classList.remove('active');
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        }
+
+        // Fungsi untuk memuat data dari Google Sheets
+        async function loadData() {
+            showLoading();
+            try {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        action: "read", 
+                        startRow: 2, 
+                        limit: 1000 // Load semua data untuk client-side processing
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    fieldNames = result.fields.slice(1); // Remove 'id' field
+                    allRecords = result.records || [];
+                    totalRecords = result.totalRecords || allRecords.length;
+                    
+                    // Cari field unik berdasarkan COL_UNIQUE = 1 (kolom pertama setelah id)
+                    if (fieldNames.length > 0) {
+                        uniqueFieldName = fieldNames[0]; // Kolom pertama adalah field unik
+                    }
+                    
+                    performSearch(); // Apply initial search/filter
+                    updatePagination();
+                } else {
+                    throw new Error(result.message || 'Gagal memuat data');
+                }
+            } catch (error) {
+                showError('Gagal memuat data: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fungsi untuk mengurutkan data - DIPERBAIKI
+        function sortData(columnIndex) {
+            // Reset kelas sort pada semua header
+            document.querySelectorAll('th').forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Tentukan arah sort
+            if (currentSort.column === columnIndex) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = columnIndex;
+                currentSort.direction = 'asc';
+            }
+            
+            // Terapkan kelas CSS untuk ikon sort
+            const currentHeader = document.querySelectorAll('th')[columnIndex];
+            currentHeader.classList.add(`sort-${currentSort.direction}`);
+            
+            // Urutkan data
+            filteredRecords.sort((a, b) => {
+                let aValue = a[columnIndex];
+                let bValue = b[columnIndex];
+                
+                // Handle perbandingan string (case insensitive)
+                if (typeof aValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+                
+                if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            renderTable();
+        }
+
+        // Fungsi untuk melakukan pencarian
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                filteredRecords = [...allRecords];
+            } else {
+                filteredRecords = allRecords.filter(record => {
+                    // Skip ID di index 0, cari di semua field
+                    for (let i = 1; i < record.length; i++) {
+                        if (record[i] && record[i].toString().toLowerCase().includes(searchTerm)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+            
+            currentPage = 1;
+            updatePagination();
+            renderTable();
+        }
+
+        // Fungsi untuk update pagination
+        function updatePagination() {
+            totalPages = Math.ceil(filteredRecords.length / perPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+            
+            updatePaginationInfo();
+            updatePaginationButtons();
+            renderPageNumbers();
+        }
+
+        // Fungsi untuk render tabel
+        function renderTable() {
+            renderTableHeader();
+            renderTableBody();
+        }
+
+        // Fungsi untuk render header tabel - DIPERBAIKI
+        function renderTableHeader() {
+            tableHeader.innerHTML = '';
+            const headerRow = document.createElement('tr');
+            
+            // Tambah kolom ID
+            const idHeader = document.createElement('th');
+            idHeader.textContent = 'ID';
+            idHeader.addEventListener('click', () => sortData(0));
+            idHeader.innerHTML += ' <i class="fas fa-sort sort-icon"></i>';
+            headerRow.appendChild(idHeader);
+            
+            // Tambah kolom field lainnya
+            fieldNames.forEach((field, index) => {
+                const fieldHeader = document.createElement('th');
+                fieldHeader.textContent = field;
+                fieldHeader.addEventListener('click', () => sortData(index + 1)); // +1 karena ID di index 0
+                fieldHeader.innerHTML += ' <i class="fas fa-sort sort-icon"></i>';
+                headerRow.appendChild(fieldHeader);
+            });
+            
+            tableHeader.appendChild(headerRow);
+        }
+
+        // Fungsi untuk render body tabel
+        function renderTableBody() {
+            tableBody.innerHTML = '';
+            
+            if (filteredRecords.length === 0) {
+                tableBody.innerHTML = `
+                    <tr class="no-results">
+                        <td colspan="${fieldNames.length + 1}">
+                            ${searchInput.value ? 'Tidak ada data yang cocok dengan pencarian' : 'Tidak ada data'}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Calculate records for current page
+            const startIndex = (currentPage - 1) * perPage;
+            const endIndex = Math.min(startIndex + perPage, filteredRecords.length);
+            const currentRecords = filteredRecords.slice(startIndex, endIndex);
+            
+            currentRecords.forEach(record => {
+                const row = document.createElement('tr');
+                let rowHTML = '';
+                
+                // ID
+                rowHTML += `<td>${record[0]}</td>`;
+                
+                // Data kolom (skip ID di index 0)
+                for (let i = 1; i < record.length; i++) {
+                    rowHTML += `<td>${record[i]}</td>`;
+                }
+                
+                row.innerHTML = rowHTML;
+                
+                row.addEventListener('click', () => {
+                    openEditModal(record[0], record);
+                });
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk update informasi pagination
+        function updatePaginationInfo() {
+            const startIndex = (currentPage - 1) * perPage + 1;
+            const endIndex = Math.min(currentPage * perPage, filteredRecords.length);
+            const totalDisplayed = filteredRecords.length;
+            
+            let searchInfo = '';
+            if (searchInput.value.trim() !== '') {
+                searchInfo = ` (pencarian: "${searchInput.value.trim()}")`;
+            }
+            
+            paginationInfo.textContent = `Menampilkan ${startIndex}-${endIndex} dari ${totalDisplayed} data${searchInfo}`;
+        }
+
+        // Fungsi untuk update status tombol pagination
+        function updatePaginationButtons() {
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Fungsi untuk render nomor halaman
+        function renderPageNumbers() {
+            pageNumbersContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            
+            // Adjust jika di awal
+            if (currentPage <= 2) {
+                endPage = Math.min(totalPages, 5);
+            }
+            
+            // Adjust jika di akhir
+            if (currentPage >= totalPages - 1) {
+                startPage = Math.max(1, totalPages - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => goToPage(i));
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+        }
+
+        // Fungsi untuk navigasi halaman
+        function goToPrevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                updatePagination();
+            }
+        }
+
+        function goToNextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                updatePagination();
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderTable();
+            updatePagination();
+        }
+
+        function handlePageSizeChange() {
+            perPage = parseInt(pageSizeSelect.value);
+            currentPage = 1;
+            updatePagination();
+            renderTable();
+        }
+
+        // Fungsi untuk membuka modal tambah data
+        function openAddModal() {
+            isEditMode = false;
+            currentId = null;
+            modalTitle.textContent = 'Tambah Data Baru';
+            renderForm();
+            deleteBtn.style.display = 'none';
+            dataModal.style.display = 'flex';
+        }
+
+        // Fungsi untuk membuka modal edit data
+        function openEditModal(id, record) {
+            isEditMode = true;
+            currentId = id;
+            modalTitle.textContent = 'Edit Data';
+            renderForm(record);
+            deleteBtn.style.display = 'inline-flex';
+            dataModal.style.display = 'flex';
+        }
+
+        // Fungsi untuk merender form secara dinamis
+        function renderForm(record = null) {
+            dataForm.innerHTML = '';
+            
+            fieldNames.forEach((field, index) => {
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = field;
+                label.htmlFor = `field-${index}`;
+                
+                // Tandai field unik sebagai required
+                if (uniqueFieldName === field) {
+                    label.classList.add('required-field');
+                }
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `field-${index}`;
+                input.className = 'form-control';
+                
+                if (uniqueFieldName === field) {
+                    input.required = true;
+                }
+                
+                if (record) {
+                    // record[0] adalah ID, record[index+1] adalah data field
+                    input.value = record[index + 1] || '';
+                }
+                
+                formGroup.appendChild(label);
+                
+                if (uniqueFieldName === field) {
+                    const fieldInfo = document.createElement('div');
+                    fieldInfo.className = 'field-info';
+                    fieldInfo.textContent = 'Field ini harus unik dan tidak boleh kosong';
+                    formGroup.appendChild(fieldInfo);
+                }
+                
+                formGroup.appendChild(input);
+                dataForm.appendChild(formGroup);
+            });
+        }
+
+        // Fungsi untuk menyimpan data
+        async function saveData() {
+            const formData = {};
+            const inputs = dataForm.querySelectorAll('input');
+            let isValid = true;
+            
+            // Validasi form
+            inputs.forEach((input, index) => {
+                const fieldName = fieldNames[index];
+                const value = input.value.trim();
+                
+                if (uniqueFieldName === fieldName && !value) {
+                    input.style.borderColor = 'var(--danger)';
+                    isValid = false;
+                } else {
+                    input.style.borderColor = '';
+                    formData[fieldName] = value;
+                }
+            });
+            
+            if (!isValid) {
+                showError('Field unik harus diisi');
+                return;
+            }
+            
+            showLoading();
+            try {
+                const action = isEditMode ? 'update' : 'create';
+                const requestData = { action, fields: formData };
+                
+                if (isEditMode) {
+                    requestData.id = currentId;
+                }
+                
+                const response = await fetch(CONFIG.API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(requestData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess(isEditMode ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan');
+                    closeDataModal();
+                    await loadData(); // Reload data dari server
+                } else {
+                    throw new Error(result.message || 'Gagal menyimpan data');
+                }
+            } catch (error) {
+                showError('Gagal menyimpan data: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fungsi untuk menghapus data
+        async function deleteData() {
+            if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
+            
+            showLoading();
+            try {
+                const response = await fetch(CONFIG.API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        action: "del", 
+                        id: currentId 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess('Data berhasil dihapus');
+                    closeDataModal();
+                    await loadData(); // Reload data dari server
+                } else {
+                    throw new Error(result.message || 'Gagal menghapus data');
+                }
+            } catch (error) {
+                showError('Gagal menghapus data: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Fungsi untuk menutup modal
+        function closeDataModal() {
+            dataModal.style.display = 'none';
+        }
+
+        // Fungsi untuk menampilkan pesan sukses
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successAlert.style.display = 'block';
+            errorAlert.style.display = 'none';
+            
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Fungsi untuk menampilkan pesan error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorAlert.style.display = 'block';
+            successAlert.style.display = 'none';
+            
+            setTimeout(() => {
+                errorAlert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Fungsi untuk menampilkan loading
+        function showLoading() {
+            loading.style.display = 'block';
+            tableBody.innerHTML = '';
+        }
+
+        // Fungsi untuk menyembunyikan loading
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
